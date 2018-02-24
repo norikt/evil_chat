@@ -3,6 +3,9 @@
   "private": true,
   "dependencies": {
     "@rails/webpacker": "^3.2.2",
+    "normalize.css": "^8.0.0"
+  },
+  "devDependencies": {
     "babel-eslint": "^8.2.2",
     "eslint": "^4.18.1",
     "eslint-config-airbnb-base": "^12.1.0",
@@ -12,9 +15,32 @@
     "eslint-plugin-prettier": "^2.6.0",
     "lint-staged": "^6.1.1",
     "pre-commit": "^1.2.2",
-    "prettier": "^1.10.2"
-  },
-  "devDependencies": {
+    "prettier": "^1.10.2",
+    "stylelint": "^9.1.1",
+    "stylelint-config-standard": "^18.1.0",
     "webpack-dev-server": "^2.11.1"
-  }
+  },
+  "scripts": {
+    "lint-staged": "$(yarn bin)/lint-staged"
+  },
+  "lint-staged": {
+    "config/webpack/**/*.js": [
+      "prettier --write",
+      "eslint",
+      "git add"
+    ],
+    "frontend/**/*.js": [
+      "prettier --write",
+      "eslint",
+      "git add"
+    ],
+    "frontend/**/*.css": [
+      "prettier --write",
+      "stylelint --fix",
+      "git add"
+    ]
+  },
+  "pre-commit": [
+    "lint-staged"
+  ]
 }
