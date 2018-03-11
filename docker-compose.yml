@@ -2,9 +2,14 @@ version: '3'
 services:
   db:
     image: postgres
+    ports:
+      - '5432:5432'
+    environment:
+      - 'POSTGRES_USER=postgres'
+      - 'POSTGRES_PASSWORD=mysecretpassword1234'
   web:
     build: .
-    command: bundle exec foreman start
+    command: /bin/sh -c "rm -f /myapp/tmp/pids/server.pid && bundle exec foreman start"
     volumes:
       - .:/myapp
     ports:
@@ -12,3 +17,8 @@ services:
       - '3035:3035'
     depends_on:
       - db
+    environment:
+      - 'DATABASE_HOST=db'
+      - 'DATABASE_PORT=5432'
+      - 'DATABASE_USER=postgres'
+      - 'DATABASE_PASSWORD=mysecretpassword1234'
