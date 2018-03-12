@@ -7,9 +7,11 @@ services:
     environment:
       - 'POSTGRES_USER=postgres'
       - 'POSTGRES_PASSWORD=mysecretpassword1234'
+    volumes:
+      - data:/var/lib/postgresql/data
   web:
     build: .
-    command: /bin/sh -c "rm -f /myapp/tmp/pids/server.pid && bundle exec foreman start"
+    command: /bin/sh -c "rm -f /myapp/tmp/pids/server.pid && bundle exec foreman start -f Procfile.dev"
     volumes:
       - .:/myapp
     ports:
@@ -22,3 +24,5 @@ services:
       - 'DATABASE_PORT=5432'
       - 'DATABASE_USER=postgres'
       - 'DATABASE_PASSWORD=mysecretpassword1234'
+volumes:
+  data:
