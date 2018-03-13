@@ -1,18 +1,34 @@
-FROM ruby:2.5.0-slim
-RUN apt-get update -qq && apt-get install -y build-essential libpq-dev curl \
-    && mkdir /myapp \
-    # nodejs & yarn
-    && curl -sL https://deb.nodesource.com/setup_8.x | bash - \
-    && curl -sSL https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - \
-    && echo "deb https://dl.yarnpkg.com/debian/ stable main" > /etc/apt/sources.list.d/yarn.list \
-    && apt-get update && apt-get install -y nodejs yarn
+FROM ruby:2.5.0-alpine
 
-WORKDIR /myapp
-COPY Gemfile /myapp/Gemfile
-COPY Gemfile.lock /myapp/Gemfile.lock
-RUN bundle install -j4 \
-    && yarn install \
-    && bundle exec rails webpacker:compile
-COPY . /myapp
+ENV BUILD_PACKAGES="build-base bash" \
+    DEV_PACKAGES="curl-dev ruby-dev zlib-dev libxml2-dev libxslt-dev tzdata yaml-dev curl mariadb-client" \
+    RUBY_PACKAGES="ruby-json yaml nodejs yarn" \
+    RAILS_ROOT="/myapp"
+
+RUN apk update && apk add --no-cache \
+    $BUILD_PACKAGES \
+    $DEV_PACKAGES \
+    $RUBY_PACKAGES \
+    && apk add --no-cache --virtual gem_dep_packages \
+    mariadb-dev \
+    imagemagick6 \
+    imagemagick6-dev \
+    linux-headers \
+    git \
+    ### TZ
+    && cp /usr/share/zoneinfo/Asia/Tokyo /etc/localtime \
+    ###
+    && mkdir -p $RAILS_ROOT
+
+WORKDIR $RAILS_ROOT
+COPY . $RAILS_ROOT
+EXPOSE 3000
+RUN bundle config build.nokogiri --use-system-libraries \
+    && bundle install -j4 \
+    && bundle clean \
+    # && yarn install \
+    # && yarn run build \
+    # && bundle exec rails webpacker:compile \
+    && bundle exec rails assets:precompile
 
 CMD ["rails", "server", "-b", "0.0.0.0"]
