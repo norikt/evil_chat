@@ -10,5 +10,9 @@ RUN apt-get update -qq && apt-get install -y build-essential libpq-dev curl \
 WORKDIR /myapp
 COPY Gemfile /myapp/Gemfile
 COPY Gemfile.lock /myapp/Gemfile.lock
-RUN bundle install
+RUN bundle install -j4 \
+    && yarn install \
+    && bundle exec rails webpacker:compile
 COPY . /myapp
+
+CMD ["rails", "server", "-b", "0.0.0.0"]
